@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     #Local Apps
     'core.apps.CoreConfig',
     'staff.apps.StaffConfig',
+    'students.apps.StudentsConfig',
 ]
 
 MIDDLEWARE = [

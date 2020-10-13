@@ -116,8 +116,56 @@ class School(models.Model):
         null=True,
         upload_to=school_logo_file_path
     )
+    programmes = models.ManyToManyField(
+        'Programme',
+        related_name='schools'
+    )
 
     def __str__(self):
         return self.name
 
 
+class Programme(models.Model):
+    """Student programmes"""
+
+    name = models.CharField(max_length=32, unique=True)
+    code = models.CharField(max_length=16, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    created_by = models.CharField(max_length=64, blank=True)
+    updated = models.DateTimeField(auto_now=True)
+    updated_by = models.CharField(max_length=64, blank=True)
+
+    def __str__(self):
+        return f'{self.name}'
+
+
+class Grade(models.Model):
+    """Grade model """
+
+    YEARS_IN_SCHOOL = (
+        (1, 1),
+        (2, 2),
+        (3, 3),
+        (4, 4),
+        (5, 5),
+        (6, 6)
+    )
+    name = models.CharField(max_length=32, unique=True)
+    year = models.PositiveSmallIntegerField(unique=True, choices=YEARS_IN_SCHOOL)
+    programme = models.ForeignKey(
+        Programme,
+        related_name='grades',
+        on_delete=models.CASCADE
+    )
+    school = models.ForeignKey(
+        School,
+        related_name='grades',
+        on_delete=models.CASCADE
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    created_by = models.CharField(max_length=64, blank=True)
+    updated = models.DateTimeField(auto_now=True)
+    updated_by = models.CharField(max_length=64, blank=True)
+
+    def __str__(self):
+        return f'{self.year}{self.name}'

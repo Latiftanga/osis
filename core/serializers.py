@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model, authenticate
 from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
-
+from core.models import Programme, Grade, School
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for converting user model object"""
@@ -49,3 +49,89 @@ class AuthTokenSerializer(serializers.Serializer):
             raise serializers.ValidationError(msg, code='authentication')
         attrs['user'] = user
         return attrs
+
+class ProgrammeSerializer(serializers.ModelSerializer):
+    """Programme serializer"""
+
+    class Meta:
+        model = Programme
+        fields = (
+            'id',
+            'name',
+            'code',
+        )
+        read_only_fields = (
+            'id',
+        )
+
+
+class RegisterProgrammes(serializers.ModelSerializer):
+
+    programmes = serializers.PrimaryKeyRelatedField(
+        read_only=False,
+        many=True,
+        queryset=Programme.objects.all()
+    )
+
+    class Meta:
+        model = School
+        fields = ('id', 'programmes')
+        read_only_fields = ('id',)
+
+
+class GradeSerializer(serializers.ModelSerializer):
+    """Programme serializer"""
+
+    class Meta:
+        model = Grade
+        fields = (
+            'id',
+            'name',
+            'year',
+            'programme',
+            'created',
+            'created_by',
+            'updated',
+            'updated_by'
+        )
+        read_only_fields = (
+            'id',
+            'created',
+            'created_by',
+            'updated',
+            'updated_by'
+        )
+
+
+class SchoolSerializer(serializers.ModelSerializer):
+
+    programmes = serializers.StringRelatedField(many=True)
+    class Meta:
+        model = School
+        fields = (
+            'id',
+            'name',
+            'level',
+            'code',
+            'motto',
+            'logo',
+            'address',
+            'city',
+            'region',
+            'phone',
+            'postal_code',
+            'email',
+            'programmes',
+        )
+        read_only_fields = (
+            'id',
+        )
+
+
+class SchoolLogoSerializer(serializers.ModelSerializer):
+    """Serializer that upload logo to school instance"""
+
+    class Meta:
+        model = School
+        fields = ('id', 'logo')
+        read_only_fields = ('id', )

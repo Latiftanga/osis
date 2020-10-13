@@ -31,3 +31,5 @@ class UserAdmin(BaseUserAdmin):
 
 admin.site.register(models.School)
 admin.site.register(models.User)
+admin.site.register(models.Programme)
+admin.site.register(models.Grade)

@@ -46,7 +46,7 @@ class Staff(models.Model):
     account = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
-        related_name='profile',
+        related_name='staff_profile',
         blank=True,
         null=True
     )
