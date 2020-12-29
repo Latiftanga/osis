@@ -1,11 +1,13 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
     PermissionsMixin
 )
+import jwt
 
 
 def school_logo_file_path(instance, filename):
@@ -87,6 +89,31 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+    # @property
+    # def token(self):
+    #     """
+    #     Allows us to get a user's token by calling `user.token` instead of
+    #     `user.generate_jwt_token().
+
+    #     The `@property` decorator above makes this possible. `token` is called
+    #     a "dynamic property".
+    #     """
+    #     return self._generate_jwt_token()
+
+    # def _generate_jwt_token(self):
+    #     """
+    #     Generates a JSON Web Token that stores this user's ID and has an expiry
+    #     date set to 60 days into the future.
+    #     """
+    #     dt = datetime.now() + timedelta(days=60)
+
+    #     token = jwt.encode({
+    #         'id': self.pk,
+    #         'exp': int(dt.strftime('%s'))
+    #     }, settings.SECRET_KEY, algorithm='HS256')
+
+    #     return token.decode('utf-8')
 
 
 class School(models.Model):

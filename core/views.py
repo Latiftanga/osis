@@ -2,20 +2,21 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins, generics
 from rest_framework.views import APIView
 from rest_framework.settings import api_settings
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
+# from rest_framework.authentication import TokenAuthentication
+# from rest_framework.authtoken.views import ObtainAuthToken
+# from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from core import serializers
 from core.models import School
-from core.serializers import UserSerializer, AuthTokenSerializer, SchoolSerializer
+# from core.serializers import UserSerializer, AuthTokenSerializer, SchoolSerializer
+from core.renderers import UserJSONRenderer
 from rest_framework.decorators import api_view
 from rest_framework.reverse import reverse
 import django_filters.rest_framework
-
+from django.contrib.auth import get_user_model
 
 from core import serializers
 from core.models import Programme, Grade
@@ -42,7 +43,7 @@ class ListCreateReadUpdateViewSet(
     To use it, override the class and set the `.queryset` and
     `.serializer_class` attributes.
     """
-    authentication_classes = (TokenAuthentication,)
+    # authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
@@ -63,42 +64,67 @@ class ListCreateReadUpdateViewSet(
         )
 
 
+class LoginAPIView(APIView):
+    permission_classes = (AllowAny,)
+    # renderer_classes = (UserJSONRenderer,)
+    serializer_class = serializers.LoginSerializer
+
+    def post(self, request):
+        # user = request.data.get('user', {})
+        data = {'email': request.data.get('email'), 'password': request.data.get('password')}
+        print(data)
+        # Notice here that we do not call `serializer.save()` like we did for
+        # the registration endpoint. This is because we don't  have
+        # anything to save. Instead, the `validate` method on our serializer
+        # handles everything we need.
+        serializer = self.serializer_class(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UsersViewSets(ListCreateReadUpdateViewSet):
+    authentication_classes = []
+    permission_classes = []
+    serializer_class = serializers.UserSerializer
+
+
 class UserCreateAPIView(generics.CreateAPIView):
     """Create a new user in the system"""
-    serializer_class = UserSerializer
+    serializer_class = serializers.UserSerializer
 
     # def perform_create(self, serializer):
     #     serializer.save(school=self.request.user.school)
 
 
-class CreateTokenAPIView(ObtainAuthToken):
-    """Create a new token for a user"""
-    serializer_class = AuthTokenSerializer
-    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+# class CreateTokenAPIView(ObtainAuthToken):
+#     """Create a new token for a user"""
+#     serializer_class = AuthTokenSerializer
+#     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
 
-class CustomAuthToken(ObtainAuthToken):
-    permission_classes = []
-    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+# class CustomAuthToken(ObtainAuthToken):
+#     permission_classes = []
+#     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(
-            data=request.data,
-            context={'request': request}
-        )
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'token': token.key,
-            'id': user.pk,
-            'email': user.email
-        })
+#     def post(self, request, *args, **kwargs):
+#         serializer = self.serializer_class(
+#             data=request.data,
+#             context={'request': request}
+#         )
+#         serializer.is_valid(raise_exception=True)
+#         user = serializer.validated_data['user']
+#         token, created = Token.objects.get_or_create(user=user)
+#         return Response({
+#             'token': token.key,
+#             'id': user.pk,
+#             'email': user.email
+#         })
 
 
 class ManageUserView(generics.RetrieveUpdateAPIView):
     """Manage authenticated user"""
-    serializer_class = UserSerializer
+    serializer_class = serializers.UserSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
@@ -108,40 +134,37 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
 
 class UserCreateAPIView(generics.CreateAPIView):
     """Create a new user in the system"""
-    serializer_class = UserSerializer
-
-    # def perform_create(self, serializer):
-    #     serializer.save(school=self.request.user.school)
+    serializer_class = serializers.UserSerializer
 
 
-class CreateTokenAPIView(ObtainAuthToken):
-    """Create a new token for a user"""
-    serializer_class = AuthTokenSerializer
-    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+# class CreateTokenAPIView(ObtainAuthToken):
+#     """Create a new token for a user"""
+#     serializer_class = AuthTokenSerializer
+#     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
 
-class CustomAuthToken(ObtainAuthToken):
-    permission_classes = []
-    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+# class CustomAuthToken(ObtainAuthToken):
+#     permission_classes = []
+#     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(
-            data=request.data,
-            context={'request': request}
-        )
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'token': token.key,
-            'id': user.pk,
-            'email': user.email
-        })
+#     def post(self, request, *args, **kwargs):
+#         serializer = self.serializer_class(
+#             data=request.data,
+#             context={'request': request}
+#         )
+#         serializer.is_valid(raise_exception=True)
+#         user = serializer.validated_data['user']
+#         token, created = Token.objects.get_or_create(user=user)
+#         return Response({
+#             'token': token.key,
+#             'id': user.pk,
+#             'email': user.email
+#         })
 
 
 class ManageUserView(generics.RetrieveUpdateAPIView):
     """Manage authenticated user"""
-    serializer_class = UserSerializer
+    serializer_class = serializers.UserSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
@@ -173,7 +196,7 @@ class SchoolViewSets(viewsets.GenericViewSet):
     """
     A simple ViewSet for viewing  school current school info.
     """
-    serializer_class = SchoolSerializer
+    serializer_class = serializers.SchoolSerializer
 
     def get_serializer_class(self):
         """Return appropriate serializer class"""
@@ -191,7 +214,6 @@ class SchoolViewSets(viewsets.GenericViewSet):
         serializer = self.get_serializer(school)
         return Response(serializer.data)
 
-        
     @action(methods=('POST',), detail=False, url_path='register-programmes')
     def register_programmes(self, request):
         programmes = self.request.data.get('programmes', None)
@@ -223,4 +245,3 @@ class SchoolViewSets(viewsets.GenericViewSet):
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
-

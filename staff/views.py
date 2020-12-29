@@ -15,22 +15,24 @@ from staff.models import (
     Appointment
 )
 from core.models import User
+# from core.renderers import UserJSONRenderer
 
 
 class StaffViewSets(ListCreateReadUpdateViewSet):
     """Manage grades in the database"""
+    # renderer_classes = (UserJSONRenderer,)
     permission_classes = (IsStaff,)
     queryset = Staff.objects.all()
     serializer_class = serializers.StaffSerializer
 
     def get_serializer_class(self):
         """Return appropriate serializer class"""
-        if self.action == 'retrieve' or self.action == 'list' :
+        if self.action == 'retrieve' or self.action == 'list':
             return serializers.StaffDetailSerializer
         elif self.action == 'upload_image':
             return serializers.StaffImageSerializer
         elif self.action == 'appointment':
-            return serializers.AppointmentSerializer     
+            return serializers.AppointmentSerializer
         elif self.action == 'certificates' or self.action == 'certificate':
             return serializers.StaffCertificateSerializer
         elif self.action == 'promotions' or self.action == 'promotion':
@@ -77,7 +79,7 @@ class StaffViewSets(ListCreateReadUpdateViewSet):
         else:
             certs = staff.certificates.all()
             serializer = self.get_serializer(certs, many=True)
-            return Response( serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['GET', 'PUT', 'DELETE'], detail=True, url_path='certificates/(?P<pk1>[^/.]+)')
     def certificate(self, request, pk1=None, pk=None):
@@ -109,7 +111,7 @@ class StaffViewSets(ListCreateReadUpdateViewSet):
             certificate.delete()
             return Response(
                 status=status.HTTP_204_NO_CONTENT
-            )          
+            )
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -131,7 +133,7 @@ class StaffViewSets(ListCreateReadUpdateViewSet):
         else:
             promotions = staff.promotions.all()
             serializer = self.get_serializer(promotions, many=True)
-            return Response( serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['GET', 'POST'], detail=True, url_path='certificates')
     def certificates(self, request, pk=None):
@@ -151,7 +153,7 @@ class StaffViewSets(ListCreateReadUpdateViewSet):
         else:
             certs = staff.certificates.all()
             serializer = self.get_serializer(certs, many=True)
-            return Response( serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['GET', 'PUT', 'DELETE'], detail=True, url_path='promotions/(?P<pk1>[^/.]+)')
     def promotion(self, request, pk1=None, pk=None):
@@ -183,7 +185,7 @@ class StaffViewSets(ListCreateReadUpdateViewSet):
             promotion.delete()
             return Response(
                 status=status.HTTP_204_NO_CONTENT
-            )          
+            )
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -231,7 +233,7 @@ class StaffViewSets(ListCreateReadUpdateViewSet):
                 status=status.HTTP_200_OK
             )
         elif staff.appointment is None and request.method == 'GET':
-            return Response(status=status.HTTP_204_NO_CONTENT)        
+            return Response(status=status.HTTP_204_NO_CONTENT)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -242,7 +244,7 @@ class StaffViewSets(ListCreateReadUpdateViewSet):
         if staff.account:
             return Response(
                 {'Error': f'{staff.name} already has user account'},
-                status=status.HTTP_400_BAD_REQUEST               
+                status=status.HTTP_400_BAD_REQUEST
             )
         else:
             serializer = self.get_serializer(data=request.data)

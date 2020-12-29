@@ -121,11 +121,11 @@ class StaffPromotionSerializer(serializers.ModelSerializer):
 
 
 class StaffPromotionDetailSerializer(StaffPromotionSerializer):
-        grade = serializers.StringRelatedField(read_only=True)
+    grade = serializers.StringRelatedField(read_only=True)
 
 
 class StaffSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = models.Staff
         fields = [
@@ -146,9 +146,11 @@ class StaffSerializer(serializers.ModelSerializer):
             'appointment',
             'certificates',
             'promotions',
+            'name',
         ]
         read_only_fields = (
             'id',
+            'name',
             'appointment',
             'promotions',
             'certificates',
